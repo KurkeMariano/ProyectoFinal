@@ -1,40 +1,51 @@
-version: '3.8'
+version: '3'
 
 services:
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    build: 
+      context: ./backend 
+      dockerfile: ./Dockerfile
+    command: python app.py # O el comando para iniciar tu aplicación backend
+    volumes:
+      - ./backend:/app
     ports:
-      - "8080:8080" # Puerto para acceder al backend o a la interfaz de Airflow
-    environment:
-      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
-      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@db:5432/airflow
+      - 5000:5000 # Ajusta según tu configuración
     depends_on:
-      - db
-    volumes:
-      - ./backend/app:/app
-    command: ["airflow", "scheduler"]
+      - db # Si tienes una base de datos
 
-  db:
-    image: postgres:13
+  #frontend:
+  #  build: 
+  #    context: ./frontend/angular_app
+  #    dockerfile: ./Dockerfile
+  #  volumes:
+  #    - ./frontend/angular_app:/app
+  #  ports:
+  #    - 4200:4200
+  #  depends_on:
+  #    - backend # Para que el frontend espere a que el backend esté listo
+
+  # Servicio de Airflow
+  airflow:
+    image: puckel/docker-airflow # O una imagen personalizada de Airflow
     environment:
-      POSTGRES_USER: airflow
-      POSTGRES_PASSWORD: airflow
-      POSTGRES_DB: airflow
-    ports:
-      - "5432:5432"
+      - LOAD_EX=dags,webserver,scheduler,celery,flower,triggerer,redis # Servicios a iniciar
+      - FERNET_KEY=... # Genera una clave segura (importante para la seguridad)
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://usuario_db:contraseña_db@db/airflow # Conexión a la base de datos (ajusta según tu configuración)
+      - AIRFLOW__CORE__EXECUTOR=CeleryExecutor # O el ejecutor que prefieras
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      - ./backend/airflow/dags:/opt/airflow/dags # Monta tus DAGs
+      - ./backend/airflow/config:/opt/airflow/config # Configuración personalizada (opcional)
     ports:
-      - "4200:4200" # Puerto para acceder al frontend de Angular
-    volumes:
-      - ./frontend/src:/app/src
+      - 8080:8080 # Puerto de la interfaz web de Airflow
+    depends_on:
+      - db # Airflow depende de la base de datos
 
-volumes:
-  postgres_data:
+  # Ejemplo de servicio de base de datos PostgreSQL (ajusta según tu configuración)
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: usuario_db
+      POSTGRES_PASSWORD: contraseña_db
+      POSTGRES_DB: nombre_db
+    volumes:
+      - ./data/db:/var/lib/postgresql/data

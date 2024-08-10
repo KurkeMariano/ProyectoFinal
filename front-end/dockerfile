@@ -1,0 +1,21 @@
+# frontend/Dockerfile
+FROM node:16
+
+# Establecer directorio de trabajo
+WORKDIR /app
+
+# Instalar dependencias del proyecto
+COPY package*.json ./
+RUN npm install
+
+# Copiar el código fuente de Angular
+COPY ./src /app
+
+# Construir la aplicación Angular
+RUN npm run build
+
+# Exponer el puerto para el servidor de desarrollo
+EXPOSE 4200
+
+# Comando para iniciar el servidor de desarrollo de Angular
+CMD ["npm", "start"]

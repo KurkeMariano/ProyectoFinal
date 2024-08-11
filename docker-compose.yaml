@@ -95,7 +95,8 @@ services:
       POSTGRES_PASSWORD: airflow
       POSTGRES_DB: airflow
     volumes:
-      - postgres-db-volume:/var/lib/postgresql/data
+      - local_pgdata:/var/lib/postgresql/data
+      - ./sql/create_schema.sql:/docker-entrypoint-initdb.d/create_schema.sq
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "airflow"]
       interval: 10s
@@ -113,6 +114,8 @@ services:
       - "5050:80"
     depends_on:
       - postgres
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
 
   redis:
     # Redis is limited to 7.2-bookworm due to licencing change
@@ -298,4 +301,5 @@ services:
         condition: service_completed_successfully
 
 volumes:
-  postgres-db-volume:
+  local_pgdata:
+  pgadmin-data:

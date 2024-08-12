@@ -1,3 +1,4 @@
 backend/airflow/logs/
 node_modules
 ProyectoFinal/backend/airflow/logs
+backend/airflow/logs/scheduler/latest

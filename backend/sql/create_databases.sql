@@ -1,0 +1,5 @@
+CREATE DATABASE FinanSys;
+
+\c FinanSys;
+
+CREATE SCHEMA IF NOT EXISTS FinanSys;

@@ -1,0 +1,15 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "PostgresDB",
+      "Group": "Server_FinanSys",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "airflow",
+      "Username": "airflow",
+      "Password": "airflow",
+      "SSLMode": "prefer",
+      "ConnectionTimeout": 10
+    }
+  }
+}

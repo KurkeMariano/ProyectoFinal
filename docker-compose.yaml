@@ -96,7 +96,6 @@ services:
       POSTGRES_DB: airflow
     volumes:
       - local_pgdata:/var/lib/postgresql/data
-      - ./sql/create_schema.sql:/docker-entrypoint-initdb.d/create_schema.sq
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "airflow"]
       interval: 10s
@@ -116,6 +115,7 @@ services:
       - postgres
     volumes:
       - pgadmin-data:/var/lib/pgadmin
+      - ./backend/pgadmin_config/servers.json:/pgadmin4/servers.json
 
   redis:
     # Redis is limited to 7.2-bookworm due to licencing change
@@ -130,6 +130,18 @@ services:
       retries: 50
       start_period: 30s
     restart: always
+
+  airflow-permission-fix:
+    image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.9.3}
+    command: >
+      bash -c "mkdir -p /opt/airflow/logs/dag_processor_manager &&
+               chown -R ${AIRFLOW_UID:-50000}:0 /opt/airflow/logs"
+    user: "0:0"
+    volumes:
+      - ./backend/airflow/logs:/opt/airflow/logs
+    depends_on:
+      - postgres
+      - redis
 
   airflow-webserver:
     <<: *airflow-common
@@ -250,8 +262,6 @@ services:
           echo "   https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html#before-you-begin"
           echo
         fi
-        mkdir -p /sources/logs /sources/dags /sources/plugins
-        chown -R "${AIRFLOW_UID}:0" /sources/{logs,dags,plugins}
         exec /entrypoint airflow version
     # yamllint enable rule:line-length
     environment:

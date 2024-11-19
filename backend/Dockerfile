@@ -5,7 +5,7 @@ FROM python:3.9-slim-buster
 WORKDIR /app
 
 # Copiar el archivo de requerimientos
-COPY requirements.txt requirements.txt
+COPY backend/requirements.txt requirements.txt
 
 # Instalar las dependencias de Python
 RUN pip install --no-cache-dir -r requirements.txt
@@ -13,5 +13,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copiar el resto del código de la aplicación
 COPY . .
 
-# Comando para iniciar la aplicación FastAPI
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"] 
+# Copiar los scripts SQL
+COPY sql/ /app/sql/
+
+# Comando para iniciar la aplicación FastAPI (ajusta según tu necesidad)
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
